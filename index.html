@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIS 322 – VB.NET Study Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #141720;
+    --surface2: #1c2030;
+    --border: #252a3a;
+    --accent: #4fffb0;
+    --accent2: #7b6cff;
+    --accent3: #ff6c8a;
+    --text: #e8ecf5;
+    --muted: #6b7494;
+    --code-bg: #0a0c10;
+    --pass: #4fffb0;
+    --fail: #ff6c8a;
+    --warn: #ffc85a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.4rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+  }
+
+  .logo-badge {
+    background: var(--accent);
+    color: #000;
+    font-weight: 800;
+    font-size: .7rem;
+    letter-spacing: .12em;
+    padding: .3rem .6rem;
+    border-radius: 4px;
+  }
+
+  .logo-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+  }
+
+  .header-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    color: var(--muted);
+  }
+
+  /* ── Layout ── */
+  .shell {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 65px);
+  }
+
+  /* ── Sidebar ── */
+  nav {
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    padding: 1.5rem 0;
+    overflow-y: auto;
+    position: sticky;
+    top: 65px;
+    height: calc(100vh - 65px);
+  }
+
+  .nav-section {
+    padding: 0 1.25rem .5rem;
+    font-size: .65rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: .18em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 1.5rem;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .6rem 1.25rem;
+    cursor: pointer;
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--muted);
+    border-left: 3px solid transparent;
+    transition: all .18s;
+    user-select: none;
+  }
+
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+
+  .nav-item.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: rgba(79,255,176,.07);
+  }
+
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background .18s;
+  }
+  .nav-item.active .nav-dot { background: var(--accent); }
+
+  .nav-badge {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .65rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: .1rem .45rem;
+  }
+
+  /* ── Main panel ── */
+  main {
+    padding: 2.5rem 3rem;
+    overflow-y: auto;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── Home / Dashboard ── */
+  .dashboard-hero {
+    margin-bottom: 2.5rem;
+  }
+
+  .dashboard-hero h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: .75rem;
+  }
+
+  .dashboard-hero h1 span { color: var(--accent); }
+
+  .dashboard-hero p {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 560px;
+    line-height: 1.6;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity .2s;
+  }
+
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.4); }
+  .card:hover::before { opacity: 1; }
+
+  .card-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .65rem;
+    letter-spacing: .15em;
+    color: var(--accent);
+    margin-bottom: .6rem;
+    text-transform: uppercase;
+  }
+
+  .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: .4rem; }
+  .card p { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-top: 1rem;
+    font-size: .78rem;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Exercise page ── */
+  .ex-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ex-label {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: #000;
+    font-weight: 800;
+    font-size: .75rem;
+    letter-spacing: .1em;
+    padding: .5rem .9rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    margin-top: .2rem;
+  }
+
+  .ex-title { font-size: 1.6rem; font-weight: 800; line-height: 1.2; margin-bottom: .4rem; }
+  .ex-subtitle { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
+  /* ── Concept cards ── */
+  .concept-section { margin-bottom: 2rem; }
+
+  .concept-section h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .concept-section h2::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+
+  .concept-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+  }
+
+  .concept-card h4 {
+    font-size: .88rem;
+    font-weight: 700;
+    margin-bottom: .5rem;
+    color: var(--text);
+  }
+
+  .concept-card p {
+    font-size: .8rem;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: .75rem;
+  }
+
+  /* ── Code block ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .kw { color: #7b6cff; }
+  .str { color: #ffc85a; }
+  .cm { color: #4b5470; font-style: italic; }
+  .fn { color: #4fffb0; }
+  .num { color: #ff6c8a; }
+  .tp { color: #7ecfff; }
+
+  /* ── Quiz section ── */
+  .quiz-section { margin-top: 2rem; }
+
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .quiz-q {
+    font-size: .92rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  .quiz-q .q-num {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent2);
+    font-size: .8rem;
+    display: block;
+    margin-bottom: .25rem;
+  }
+
+  .quiz-options { display: flex; flex-direction: column; gap: .5rem; }
+
+  .quiz-opt {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: .65rem 1rem;
+    cursor: pointer;
+    font-size: .85rem;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all .15s;
+    text-align: left;
+    color: var(--text);
+  }
+
+  .quiz-opt:hover { border-color: var(--accent2); color: var(--accent2); }
+  .quiz-opt.correct { border-color: var(--pass); background: rgba(79,255,176,.1); color: var(--pass); }
+  .quiz-opt.wrong { border-color: var(--fail); background: rgba(255,108,138,.1); color: var(--fail); }
+  .quiz-opt:disabled { cursor: default; pointer-events: none; }
+
+  .quiz-feedback {
+    display: none;
+    margin-top: .75rem;
+    padding: .75rem 1rem;
+    border-radius: 6px;
+    font-size: .82rem;
+    line-height: 1.5;
+  }
+
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct { background: rgba(79,255,176,.08); border: 1px solid rgba(79,255,176,.3); color: #a0ffd8; }
+  .quiz-feedback.wrong { background: rgba(255,108,138,.08); border: 1px solid rgba(255,108,138,.3); color: #ffb3c1; }
+
+  /* ── Fill-in-the-blank ── */
+  .fill-blank {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--accent2);
+    border-radius: 4px;
+    padding: .1rem .4rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    color: var(--text);
+    width: 120px;
+    outline: none;
+    transition: border-color .15s;
+  }
+
+  .fill-blank:focus { border-color: var(--accent); }
+  .fill-blank.correct { border-color: var(--pass); color: var(--pass); }
+  .fill-blank.wrong { border-color: var(--fail); color: var(--fail); }
+
+  .fill-container {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .82rem;
+    line-height: 2;
+    margin-bottom: 1rem;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .6rem 1.25rem;
+    border-radius: 6px;
+    font-family: 'Syne', sans-serif;
+    font-size: .85rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all .18s;
+    letter-spacing: .03em;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+  .btn-primary:hover { background: #6fffbf; transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+
+  .btn-row { display: flex; gap: .75rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
+
+  /* ── Score bar ── */
+  .score-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .score-label { font-size: .8rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .score-val { font-size: 1.4rem; font-weight: 800; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Progress dots ── */
+  .progress-dots { display: flex; gap: .35rem; flex-wrap: wrap; margin-top: 1rem; }
+
+  .p-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .p-dot.done { background: var(--pass); }
+  .p-dot.wrong { background: var(--fail); }
+
+  /* ── Tabs ── */
+  .tab-row { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+
+  .tab {
+    padding: .65rem 1.25rem;
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all .15s;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── Alert / tip ── */
+  .tip {
+    background: rgba(123,108,255,.1);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 6px 6px 0;
+    padding: .75rem 1rem;
+    font-size: .82rem;
+    color: #c8c0ff;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+
+  /* ── Cheat sheet table ── */
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  th { background: var(--surface2); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: .72rem; letter-spacing: .1em; padding: .6rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: .6rem 1rem; border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; vertical-align: top; }
+  tr:hover td { background: var(--surface2); }
+  td:first-child { color: var(--accent); }
+  td:last-child { color: var(--muted); }
+
+  /* ── Sandbox textarea ── */
+  .sandbox {
+    width: 100%;
+    min-height: 200px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .82rem;
+    color: var(--text);
+    resize: vertical;
+    outline: none;
+    line-height: 1.7;
+    transition: border-color .15s;
+  }
+  .sandbox:focus { border-color: var(--accent2); }
+
+  .sandbox-output {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: .75rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    min-height: 60px;
+    color: var(--pass);
+    white-space: pre-wrap;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .shell { grid-template-columns: 1fr; }
+    nav { display: none; }
+    main { padding: 1.5rem; }
+    .dashboard-hero h1 { font-size: 1.8rem; }
+  }
+
+  /* ── Animations ── */
+  .page.active { animation: fadeSlide .25s ease; }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .github-banner {
+    background: linear-gradient(135deg, var(--surface2), var(--surface));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .github-banner h3 { font-size: 1rem; font-weight: 700; margin-bottom: .25rem; }
+  .github-banner p { font-size: .82rem; color: var(--muted); }
+
+  .github-banner .btn { margin-left: auto; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-badge">MIS 322</span>
+    <span class="logo-title">VB.NET Study Lab</span>
+  </div>
+  <span class="header-meta">Western Washington University</span>
+</header>
+
+<div class="shell">
+
+  <!-- ── Sidebar nav ── -->
+  <nav>
+    <div class="nav-section">Start</div>
+    <div class="nav-item active" onclick="showPage('home', this)">
+      <span class="nav-dot"></span>Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('cheatsheet', this)">
+      <span class="nav-dot"></span>Cheat Sheet
+    </div>
+    <div class="nav-item" onclick="showPage('sandbox', this)">
+      <span class="nav-dot"></span>Code Sandbox
+    </div>
+
+    <div class="nav-section">Exercises</div>
+    <div class="nav-item" onclick="showPage('ce12', this)">
+      <span class="nav-dot"></span>CE 1-2 · Even Numbers
+      <span class="nav-badge">Loop</span>
+    </div>
+    <div class="nav-item" onclick="showPage('lap1', this)">
+      <span class="nav-dot"></span>LAP 1 · Cost Calculator
+      <span class="nav-badge">Forms</span>
+    </div>
+    <div class="nav-item" onclick="showPage('tut21', this)">
+      <span class="nav-dot"></span>Tut 2-1 · NameYourPrice
+      <span class="nav-badge">Vars</span>
+    </div>
+    <div class="nav-item" onclick="showPage('tut22', this)">
+      <span class="nav-dot"></span>Tut 2-2 · InputBox
+      <span class="nav-badge">Convert</span>
+    </div>
+    <div class="nav-item" onclick="showPage('tut23', this)">
+      <span class="nav-dot"></span>Tut 2-3 · Try/Catch
+      <span class="nav-badge">Errors</span>
+    </div>
+    <div class="nav-item" onclick="showPage('lap2', this)">
+      <span class="nav-dot"></span>LAP 2 · Shipping App
+      <span class="nav-badge">LAP</span>
+    </div>
+    <div class="nav-item" onclick="showPage('tut31', this)">
+      <span class="nav-dot"></span>Tut 3-1 · T-Shirt Form
+      <span class="nav-badge">Select</span>
+    </div>
+    <div class="nav-item" onclick="showPage('tut32', this)">
+      <span class="nav-dot"></span>Tut 3-2 · Comparing Data
+      <span class="nav-badge">Ops</span>
+    </div>
+    <div class="nav-item" onclick="showPage('tut41', this)">
+      <span class="nav-dot"></span>Tut 4-1 · Multiple Forms
+      <span class="nav-badge">Global</span>
+    </div>
+    <div class="nav-item" onclick="showPage('tut42', this)">
+      <span class="nav-dot"></span>Tut 4-2 · Checkboxes
+      <span class="nav-badge">UI</span>
+    </div>
+  </nav>
+
+  <!-- ── Main ── -->
+  <main>
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="dashboard-hero">
+        <h1>Study <span>smarter</span>,<br>code better.</h1>
+        <p>Interactive exercises, quizzes, and code examples for every MIS 322 assignment. Click any exercise to start practicing.</p>
+      </div>
+
+      <div class="github-banner">
+        <div>
+          <h3>📁 Put this on GitHub</h3>
+          <p>Save this file as <code style="color:var(--accent);font-family:'JetBrains Mono',monospace">index.html</code> and push it to a GitHub repo. Enable GitHub Pages (Settings → Pages → Deploy from branch) and you'll have a live study site at <code style="color:var(--accent);font-family:'JetBrains Mono',monospace">username.github.io/repo-name</code>.</p>
+        </div>
+        <a class="btn btn-primary" href="https://github.com/new" target="_blank">New GitHub Repo ↗</a>
+      </div>
+
+      <div class="concept-section">
+        <h2>Quick Topics</h2>
+      </div>
+      <div class="card-grid">
+        <div class="card" onclick="showPage('ce12', document.querySelector('[onclick*=ce12]'))">
+          <div class="card-tag">CE 1-2 · Loop</div>
+          <h3>Even Number Counter</h3>
+          <p>For loops, Mod operator, building label text dynamically inside a loop.</p>
+          <div class="card-footer">⟳ Looping · If Then</div>
+        </div>
+        <div class="card" onclick="showPage('lap1', document.querySelector('[onclick*=lap1]'))">
+          <div class="card-tag">LAP 1 · Forms</div>
+          <h3>Cost Calculator</h3>
+          <p>Windows Forms design, properties, visible/enabled, multiple button events.</p>
+          <div class="card-footer">🪟 Forms · Properties</div>
+        </div>
+        <div class="card" onclick="showPage('tut23', document.querySelector('[onclick*=tut23]'))">
+          <div class="card-tag">Tut 2-3 · Error Handling</div>
+          <h3>Try / Catch Deep Dive</h3>
+          <p>FormatException, OverflowException, typed catches, Exit Sub patterns.</p>
+          <div class="card-footer">⚠ Try · Catch · End Try</div>
+        </div>
+        <div class="card" onclick="showPage('tut32', document.querySelector('[onclick*=tut32]'))">
+          <div class="card-tag">Tut 3-2 · Operators</div>
+          <h3>Comparing Data</h3>
+          <p>Relational operators, logical operators, .ToUpper(), string comparison.</p>
+          <div class="card-footer">= &lt; &gt; And Or .ToUpper</div>
+        </div>
+        <div class="card" onclick="showPage('tut31', document.querySelector('[onclick*=tut31]'))">
+          <div class="card-tag">Tut 3-1 · Select Case</div>
+          <h3>T-Shirt Order Form</h3>
+          <p>If/ElseIf/Else, Select Case, Random class, vbNewLine string assembly.</p>
+          <div class="card-footer">Select Case · Random</div>
+        </div>
+        <div class="card" onclick="showPage('cheatsheet', document.querySelector('[onclick*=cheatsheet]'))">
+          <div class="card-tag">Reference</div>
+          <h3>VB.NET Cheat Sheet</h3>
+          <p>All key syntax, operators, data types, and common methods in one table.</p>
+          <div class="card-footer">📋 Quick Reference</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────── -->
+    <!-- CE 1-2 -->
+    <!-- ─────────────────────────────── -->
+    <div class="page" id="page-ce12">
+      <div class="ex-header">
+        <div class="ex-label">CE 1-2</div>
+        <div>
+          <div class="ex-title">Even Number Counter</div>
+          <div class="ex-subtitle">Looping with Style · For loops, Mod, building output in a loop</div>
+        </div>
+      </div>
+
+      <div class="tab-row">
+        <div class="tab active" onclick="switchTab(this,'ce12-concepts')">Concepts</div>
+        <div class="tab" onclick="switchTab(this,'ce12-quiz')">Quiz</div>
+        <div class="tab" onclick="switchTab(this,'ce12-fill')">Fill-in</div>
+      </div>
+
+      <!-- Concepts -->
+      <div class="tab-content active" id="ce12-concepts">
+        <div class="concept-section">
+          <h2>Key Concepts</h2>
+        </div>
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>For Loop</h4>
+            <p>Use when you know the range of values to iterate through. Steps from start to end one at a time.</p>
+            <div class="code-block"><span class="kw">For</span> x <span class="kw">As Integer</span> = startNum <span class="kw">To</span> endNum
+    <span class="cm">' code runs for each x</span>
+<span class="kw">Next</span> x</div>
+          </div>
+          <div class="concept-card">
+            <h4>Mod Operator</h4>
+            <p>Returns the remainder of integer division. If x Mod 2 = 0, x is even.</p>
+            <div class="code-block"><span class="num">4</span> <span class="kw">Mod</span> <span class="num">2</span>  <span class="cm">' → 0  (even)</span>
+<span class="num">3</span> <span class="kw">Mod</span> <span class="num">2</span>  <span class="cm">' → 1  (odd)</span>
+<span class="kw">If</span> x <span class="kw">Mod</span> <span class="num">2</span> = <span class="num">0</span> <span class="kw">Then</span>
+    <span class="cm">' x is even</span>
+<span class="kw">End If</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>Building Label Text in a Loop</h4>
+            <p>Use &amp; to concatenate and a space to separate values. Build the string incrementally.</p>
+            <div class="code-block">evenNumbersLabel.Text = <span class="str">""</span>
+<span class="kw">For</span> x <span class="kw">As Integer</span> = start <span class="kw">To</span> endNum
+  <span class="kw">If</span> x <span class="kw">Mod</span> <span class="num">2</span> = <span class="num">0</span> <span class="kw">Then</span>
+    evenNumbersLabel.Text &amp;= x &amp; <span class="str">" "</span>
+  <span class="kw">End If</span>
+<span class="kw">Next</span> x</div>
+          </div>
+          <div class="concept-card">
+            <h4>StyleSheet L1+ Requirements</h4>
+            <p>Every project must have: heading comments at top, a comment inside each procedure, camelCase naming for controls and variables.</p>
+            <div class="code-block"><span class="cm">' ========================</span>
+<span class="cm">' CE 1-2  Caelyn  MIS 322</span>
+<span class="cm">' ========================</span>
+
+<span class="kw">Private Sub</span> <span class="fn">countEvenNumbersButton_Click</span>(...)
+    <span class="cm">' Count even numbers in range</span>
+    ...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quiz -->
+      <div class="tab-content" id="ce12-quiz">
+        <div class="quiz-section" id="quiz-ce12"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="checkQuiz('ce12')">Check Answers</button>
+          <button class="btn btn-ghost" onclick="resetQuiz('ce12')">Reset</button>
+        </div>
+        <div class="score-bar" id="score-ce12" style="display:none">
+          <div>
+            <div class="score-label">SCORE</div>
+            <div class="score-val" id="scoreval-ce12">0/0</div>
+          </div>
+          <div class="progress-dots" id="dots-ce12"></div>
+        </div>
+      </div>
+
+      <!-- Fill in the blank -->
+      <div class="tab-content" id="ce12-fill">
+        <div class="tip">Complete the code below. Fill in each blank with the correct VB.NET keyword or value.</div>
+        <div class="fill-container" id="fill-ce12"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="checkFill('ce12')">Check</button>
+          <button class="btn btn-ghost" onclick="resetFill('ce12')">Reset</button>
+        </div>
+        <div id="fill-result-ce12" style="margin-top:.75rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;"></div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────── -->
+    <!-- LAP 1 -->
+    <!-- ─────────────────────────────── -->
+    <div class="page" id="page-lap1">
+      <div class="ex-header">
+        <div class="ex-label">LAP 1</div>
+        <div>
+          <div class="ex-title">Cost Calculator</div>
+          <div class="ex-subtitle">Form design, properties, Visible/Enabled, multiple button events</div>
+        </div>
+      </div>
+      <div class="tab-row">
+        <div class="tab active" onclick="switchTab(this,'lap1-concepts')">Concepts</div>
+        <div class="tab" onclick="switchTab(this,'lap1-quiz')">Quiz</div>
+      </div>
+      <div class="tab-content active" id="lap1-concepts">
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>Dim variable As Type</h4>
+            <p>Declare a local (procedure-level) variable using Dim.</p>
+            <div class="code-block"><span class="kw">Dim</span> totalCost <span class="kw">As Double</span>
+totalCost = <span class="fn">CDbl</span>(itemCostTextBox.Text) _
+            * <span class="fn">CDbl</span>(quantityTextBox.Text)
+totalCostTextBox.Text = totalCost.ToString()</div>
+          </div>
+          <div class="concept-card">
+            <h4>Visible Property</h4>
+            <p>Toggle Visible to show or hide a control at runtime.</p>
+            <div class="code-block"><span class="cm">' Hide Total Cost</span>
+totalCostTextBox.Visible = <span class="kw">False</span>
+totalCostLabel.Visible = <span class="kw">False</span>
+
+<span class="cm">' Show Total Cost</span>
+totalCostTextBox.Visible = <span class="kw">True</span>
+totalCostLabel.Visible = <span class="kw">True</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>Clear Textboxes</h4>
+            <p>Use .Clear() or set .Text = "" to reset textbox content.</p>
+            <div class="code-block">itemCostTextBox.Clear()
+quantityTextBox.Clear()
+totalCostTextBox.Text = <span class="str">""</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>TextAlign &amp; ReadOnly</h4>
+            <p>Set in Properties pane. TextAlign = Right for numeric boxes. ReadOnly = True prevents user edits.</p>
+            <div class="code-block"><span class="cm">' In the Properties window:</span>
+<span class="cm">' TextAlign  → Right</span>
+<span class="cm">' ReadOnly   → True</span>
+<span class="cm">' TabStop    → False (read-only boxes)</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="lap1-quiz">
+        <div class="quiz-section" id="quiz-lap1"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="checkQuiz('lap1')">Check Answers</button>
+          <button class="btn btn-ghost" onclick="resetQuiz('lap1')">Reset</button>
+        </div>
+        <div class="score-bar" id="score-lap1" style="display:none">
+          <div class="score-label">SCORE</div>
+          <div class="score-val" id="scoreval-lap1">0/0</div>
+          <div class="progress-dots" id="dots-lap1"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────── -->
+    <!-- TUT 2-1 -->
+    <!-- ─────────────────────────────── -->
+    <div class="page" id="page-tut21">
+      <div class="ex-header">
+        <div class="ex-label">TUT 2-1</div>
+        <div>
+          <div class="ex-title">NameYourPrice Order Form</div>
+          <div class="ex-subtitle">Variables, scope (Dim vs Private), class-level vs procedure-level</div>
+        </div>
+      </div>
+      <div class="tab-row">
+        <div class="tab active" onclick="switchTab(this,'tut21-concepts')">Concepts</div>
+        <div class="tab" onclick="switchTab(this,'tut21-quiz')">Quiz</div>
+      </div>
+      <div class="tab-content active" id="tut21-concepts">
+        <div class="tip">The key challenge: deciding whether a variable should be <strong>Dim</strong> (procedure-level) or <strong>Private</strong> (class-level).</div>
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>Procedure-Level (Dim)</h4>
+            <p>Only needed inside ONE sub procedure. Declared inside the Sub.</p>
+            <div class="code-block"><span class="kw">Private Sub</span> <span class="fn">invoiceButton_Click</span>(...)
+    <span class="kw">Dim</span> subtotal <span class="kw">As Double</span>
+    <span class="kw">Dim</span> taxAmount <span class="kw">As Double</span>
+    <span class="kw">Dim</span> amountDue <span class="kw">As Double</span>
+    <span class="cm">' only used here</span>
+<span class="kw">End Sub</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>Class-Level (Private)</h4>
+            <p>Needed in MULTIPLE sub procedures. Declared at the top of the class, above all Subs.</p>
+            <div class="code-block"><span class="kw">Public Class</span> Form1
+    <span class="kw">Private</span> quantity <span class="kw">As Integer</span>
+    <span class="kw">Private</span> price <span class="kw">As Double</span>
+
+    <span class="kw">Private Sub</span> <span class="fn">plusOneButton_Click</span>(...)
+        quantity += <span class="num">1</span>
+    <span class="kw">End Sub</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>+= and -= Operators</h4>
+            <p>Shorthand to add or subtract from a variable in place.</p>
+            <div class="code-block">quantity += <span class="num">1</span>   <span class="cm">' same as quantity = quantity + 1</span>
+quantity -= <span class="num">1</span>   <span class="cm">' same as quantity = quantity - 1</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>MyBase.Load Event</h4>
+            <p>Runs when the form first opens. Good place to initialize labels (like tax rate).</p>
+            <div class="code-block"><span class="kw">Private Sub</span> <span class="fn">Form1_Load</span>(...)
+    taxLabel.Text = <span class="str">"0.10"</span>
+<span class="kw">End Sub</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tut21-quiz">
+        <div class="quiz-section" id="quiz-tut21"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="checkQuiz('tut21')">Check Answers</button>
+          <button class="btn btn-ghost" onclick="resetQuiz('tut21')">Reset</button>
+        </div>
+        <div class="score-bar" id="score-tut21" style="display:none">
+          <div class="score-label">SCORE</div>
+          <div class="score-val" id="scoreval-tut21">0/0</div>
+          <div class="progress-dots" id="dots-tut21"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────── -->
+    <!-- TUT 2-2 -->
+    <!-- ─────────────────────────────── -->
+    <div class="page" id="page-tut22">
+      <div class="ex-header">
+        <div class="ex-label">TUT 2-2</div>
+        <div>
+          <div class="ex-title">NameYourPrice (Continued)</div>
+          <div class="ex-subtitle">InputBox, Option Strict On, Convert.ToDouble, .ToString formatting, constants</div>
+        </div>
+      </div>
+      <div class="tab-row">
+        <div class="tab active" onclick="switchTab(this,'tut22-concepts')">Concepts</div>
+        <div class="tab" onclick="switchTab(this,'tut22-quiz')">Quiz</div>
+      </div>
+      <div class="tab-content active" id="tut22-concepts">
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>InputBox</h4>
+            <p>Pops up a dialog asking the user for input. Always returns a String.</p>
+            <div class="code-block"><span class="kw">Dim</span> priceText <span class="kw">As String</span>
+priceText = <span class="fn">InputBox</span>(<span class="str">"Enter price:"</span>)</div>
+          </div>
+          <div class="concept-card">
+            <h4>Explicit Conversion (Option Strict On)</h4>
+            <p>With Option Strict On, you must explicitly convert types. Use Convert functions.</p>
+            <div class="code-block"><span class="cm">' String → Double</span>
+price = <span class="fn">Convert.ToDouble</span>(priceText)
+
+<span class="cm">' String → Integer</span>
+qty = <span class="fn">Convert.ToInt32</span>(qtyText)</div>
+          </div>
+          <div class="concept-card">
+            <h4>.ToString Formatting</h4>
+            <p>Format numbers as strings for display. "C2" = currency, "N0" = number no decimals, "N2" = 2 decimal places.</p>
+            <div class="code-block">totalLabel.Text = total.ToString(<span class="str">"C2"</span>)  <span class="cm">' $27.50</span>
+qtyLabel.Text = qty.ToString(<span class="str">"N0"</span>)     <span class="cm">' 5</span>
+rateLabel.Text = rate.ToString(<span class="str">"P1"</span>)   <span class="cm">' 12.5%</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>Constants</h4>
+            <p>Use Const for values that never change (like tax rates). Cannot be reassigned.</p>
+            <div class="code-block"><span class="kw">Private Const</span> TAXRATE <span class="kw">As Double</span> = <span class="num">0.10</span>
+<span class="cm">' Use TAXRATE everywhere instead</span>
+<span class="cm">' of a variable — clearer and safer</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tut22-quiz">
+        <div class="quiz-section" id="quiz-tut22"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="checkQuiz('tut22')">Check Answers</button>
+          <button class="btn btn-ghost" onclick="resetQuiz('tut22')">Reset</button>
+        </div>
+        <div class="score-bar" id="score-tut22" style="display:none">
+          <div class="score-label">SCORE</div>
+          <div class="score-val" id="scoreval-tut22">0/0</div>
+          <div class="progress-dots" id="dots-tut22"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────── -->
+    <!-- TUT 2-3  (Try/Catch) -->
+    <!-- ─────────────────────────────── -->
+    <div class="page" id="page-tut23">
+      <div class="ex-header">
+        <div class="ex-label">TUT 2-3</div>
+        <div>
+          <div class="ex-title">Error Trapping · Try / Catch</div>
+          <div class="ex-subtitle">FormatException, OverflowException, If Then traps, Exit Sub</div>
+        </div>
+      </div>
+      <div class="tab-row">
+        <div class="tab active" onclick="switchTab(this,'tut23-concepts')">Concepts</div>
+        <div class="tab" onclick="switchTab(this,'tut23-quiz')">Quiz</div>
+        <div class="tab" onclick="switchTab(this,'tut23-fill')">Fill-in</div>
+      </div>
+      <div class="tab-content active" id="tut23-concepts">
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>Try / Catch / End Try</h4>
+            <p>Wraps risky code. If an exception occurs the matching Catch block runs. Always end with End Try.</p>
+            <div class="code-block"><span class="kw">Try</span>
+    price = <span class="fn">Convert.ToDouble</span>(priceText)
+<span class="kw">Catch</span> fe <span class="kw">As</span> <span class="tp">FormatException</span>
+    <span class="fn">MessageBox.Show</span>(<span class="str">"Price is not a number"</span>)
+    <span class="kw">Exit Sub</span>
+<span class="kw">Catch</span> oe <span class="kw">As</span> <span class="tp">OverflowException</span>
+    <span class="fn">MessageBox.Show</span>(<span class="str">"Price is too large"</span>)
+    <span class="kw">Exit Sub</span>
+<span class="kw">Catch</span> ex <span class="kw">As</span> <span class="tp">Exception</span>
+    <span class="fn">MessageBox.Show</span>(ex.Message)
+    <span class="kw">Exit Sub</span>
+<span class="kw">End Try</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>Order of Catch Blocks</h4>
+            <p>More specific exceptions must come BEFORE the general Exception catch. VB.NET processes them in order.</p>
+            <div class="code-block"><span class="cm">' CORRECT order:</span>
+<span class="kw">Catch</span> fe <span class="kw">As</span> <span class="tp">FormatException</span>   <span class="cm">' ← specific</span>
+<span class="kw">Catch</span> oe <span class="kw">As</span> <span class="tp">OverflowException</span>  <span class="cm">' ← specific</span>
+<span class="kw">Catch</span> ex <span class="kw">As</span> <span class="tp">Exception</span>          <span class="cm">' ← general last</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>Logic Error Traps (If Then)</h4>
+            <p>Use If...Then for logic errors (blank fields, negative values) BEFORE the Try/Catch conversion.</p>
+            <div class="code-block"><span class="kw">If</span> customerNameTextbox.Text = <span class="str">""</span> <span class="kw">Then</span>
+    <span class="fn">MessageBox.Show</span>(<span class="str">"Name is blank."</span>)
+    <span class="kw">Exit Sub</span>
+<span class="kw">End If</span>
+
+<span class="kw">If</span> price &lt; <span class="num">0</span> <span class="kw">Then</span>
+    <span class="fn">MessageBox.Show</span>(<span class="str">"Price must be positive."</span>)
+    <span class="kw">Exit Sub</span>
+<span class="kw">End If</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>Quantity Range Traps</h4>
+            <p>Check BEFORE updating the variable — exit sub without changing anything.</p>
+            <div class="code-block"><span class="cm">' +1 button</span>
+<span class="kw">If</span> quantity + <span class="num">1</span> &gt;= <span class="num">10</span> <span class="kw">Then</span>
+    <span class="fn">MessageBox.Show</span>(<span class="str">"Max is 10"</span>)
+    <span class="kw">Exit Sub</span>
+<span class="kw">End If</span>
+quantity += <span class="num">1</span>
+
+<span class="cm">' -1 button</span>
+<span class="kw">If</span> quantity - <span class="num">1</span> &lt; <span class="num">0</span> <span class="kw">Then</span>
+    <span class="fn">MessageBox.Show</span>(<span class="str">"Min is 0"</span>)
+    <span class="kw">Exit Sub</span>
+<span class="kw">End If</span>
+quantity -= <span class="num">1</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tut23-quiz">
+        <div class="quiz-section" id="quiz-tut23"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="checkQuiz('tut23')">Check Answers</button>
+          <button class="btn btn-ghost" onclick="resetQuiz('tut23')">Reset</button>
+        </div>
+        <div class="score-bar" id="score-tut23" style="display:none">
+          <div class="score-label">SCORE</div>
+          <div class="score-val" id="scoreval-tut23">0/0</div>
+          <div class="progress-dots" id="dots-tut23"></div>
+        </div>
+      </div>
+      <div class="tab-content" id="tut23-fill">
+        <div class="tip">Fill in the blanks to complete the Try/Catch error trap for price conversion.</div>
+        <div class="fill-container" id="fill-tut23"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="checkFill('tut23')">Check</button>
+          <button class="btn btn-ghost" onclick="resetFill('tut23')">Reset</button>
+        </div>
+        <div id="fill-result-tut23" style="margin-top:.75rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;"></div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────── -->
+    <!-- LAP 2 -->
+    <!-- ─────────────────────────────── -->
+    <div class="page" id="page-lap2">
+      <div class="ex-header">
+        <div class="ex-label">LAP 2</div>
+        <div>
+          <div class="ex-title">Shipping Cost App</div>
+          <div class="ex-subtitle">Full app: constants, +1/-1 quantity, Try/Catch, currency formatting</div>
+        </div>
+      </div>
+      <div class="tab-row">
+        <div class="tab active" onclick="switchTab(this,'lap2-concepts')">Concepts</div>
+        <div class="tab" onclick="switchTab(this,'lap2-quiz')">Quiz</div>
+      </div>
+      <div class="tab-content active" id="lap2-concepts">
+        <div class="tip">Check figures: Goods Price = 5, Shipping = 2, Qty = 4 → Tax = $2.20, Total = $24.20</div>
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>Tax Amount Formula</h4>
+            <p>Tax is applied to goods × quantity plus shipping — the full subtotal before tax.</p>
+            <div class="code-block"><span class="cm">' Tax Amount = (GoodsPrice × Qty + Shipping) × TaxRate</span>
+taxAmount = (goodsPrice * quantity + shippingCost) _
+            * TAXRATE
+taxTextBox.Text = taxAmount.ToString(<span class="str">"C2"</span>)</div>
+          </div>
+          <div class="concept-card">
+            <h4>Total Cost Formula</h4>
+            <div class="code-block"><span class="cm">' Total = GoodsPrice × Qty + Shipping + Tax</span>
+totalCost = goodsPrice * quantity _
+            + shippingCost + taxAmount
+totalCostTextBox.Text = totalCost.ToString(<span class="str">"C2"</span>)</div>
+          </div>
+          <div class="concept-card">
+            <h4>Quantity Range (1–4)</h4>
+            <p>Upper limit is 4, lower limit is 1. Initial quantity = 1.</p>
+            <div class="code-block"><span class="kw">If</span> quantity + <span class="num">1</span> > <span class="num">4</span> <span class="kw">Then</span>
+    <span class="fn">MessageBox.Show</span>(<span class="str">"Max 4 items"</span>)
+    <span class="kw">Exit Sub</span>
+<span class="kw">End If</span>
+quantity += <span class="num">1</span>
+quantityTextBox.Text = quantity.ToString()</div>
+          </div>
+          <div class="concept-card">
+            <h4>Reset App</h4>
+            <p>Return everything to initial state: clear textboxes, reset quantity to 1.</p>
+            <div class="code-block">goodsPriceTextBox.Clear()
+shippingCostTextBox.Clear()
+taxTextBox.Clear()
+totalCostTextBox.Clear()
+quantity = <span class="num">1</span>
+quantityTextBox.Text = <span class="str">"1"</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="lap2-quiz">
+        <div class="quiz-section" id="quiz-lap2"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="checkQuiz('lap2')">Check Answers</button>
+          <button class="btn btn-ghost" onclick="resetQuiz('lap2')">Reset</button>
+        </div>
+        <div class="score-bar" id="score-lap2" style="display:none">
+          <div class="score-label">SCORE</div>
+          <div class="score-val" id="scoreval-lap2">0/0</div>
+          <div class="progress-dots" id="dots-lap2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────── -->
+    <!-- TUT 3-1 -->
+    <!-- ─────────────────────────────── -->
+    <div class="page" id="page-tut31">
+      <div class="ex-header">
+        <div class="ex-label">TUT 3-1</div>
+        <div>
+          <div class="ex-title">T-Shirt Order Form</div>
+          <div class="ex-subtitle">Select Case, If/ElseIf/Else, Random class, vbNewLine, string assembly</div>
+        </div>
+      </div>
+      <div class="tab-row">
+        <div class="tab active" onclick="switchTab(this,'tut31-concepts')">Concepts</div>
+        <div class="tab" onclick="switchTab(this,'tut31-quiz')">Quiz</div>
+      </div>
+      <div class="tab-content active" id="tut31-concepts">
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>Select Case</h4>
+            <p>Cleaner than long If/ElseIf chains when testing one variable against many values.</p>
+            <div class="code-block"><span class="kw">Select Case</span> shirtColor
+  <span class="kw">Case</span> <span class="str">"Red"</span>
+    shirtPrice = <span class="num">10</span>
+  <span class="kw">Case</span> <span class="str">"Green"</span>
+    shirtPrice = <span class="num">12</span>
+  <span class="kw">Case</span> <span class="str">"Blue"</span>
+    shirtPrice = <span class="num">14</span>
+  <span class="kw">Case</span> <span class="str">"Pink"</span>
+    shirtPrice = <span class="num">16</span>
+<span class="kw">End Select</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>Random Class</h4>
+            <p>Generates pseudo-random integers. Next(1, 5) gives 1, 2, 3, or 4 (upper bound is exclusive).</p>
+            <div class="code-block"><span class="kw">Dim</span> rnd <span class="kw">As New</span> Random
+<span class="kw">Dim</span> randomNum <span class="kw">As Integer</span>
+randomNum = rnd.Next(<span class="num">1</span>, <span class="num">5</span>) <span class="cm">' 1 to 4</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>vbNewLine</h4>
+            <p>Inserts a line break inside a string — useful for multi-line labels.</p>
+            <div class="code-block">orderTotalLabel.Text = _
+  customerName &amp; <span class="str">"'s total:"</span> &amp; vbNewLine _
+  &amp; orderTotal.ToString(<span class="str">"C2"</span>)</div>
+          </div>
+          <div class="concept-card">
+            <h4>Total Calculation</h4>
+            <p>Multiply price × qty, then apply (1 + taxRate) to add tax in one step.</p>
+            <div class="code-block">orderSubTotal = shirtPrice * shirtQty
+orderTotal = orderSubTotal * (<span class="num">1</span> + TAXRATE)
+orderTotalLabel.Text = _
+  orderTotal.ToString(<span class="str">"C2"</span>)</div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tut31-quiz">
+        <div class="quiz-section" id="quiz-tut31"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="checkQuiz('tut31')">Check Answers</button>
+          <button class="btn btn-ghost" onclick="resetQuiz('tut31')">Reset</button>
+        </div>
+        <div class="score-bar" id="score-tut31" style="display:none">
+          <div class="score-label">SCORE</div>
+          <div class="score-val" id="scoreval-tut31">0/0</div>
+          <div class="progress-dots" id="dots-tut31"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────── -->
+    <!-- TUT 3-2 -->
+    <!-- ─────────────────────────────── -->
+    <div class="page" id="page-tut32">
+      <div class="ex-header">
+        <div class="ex-label">TUT 3-2</div>
+        <div>
+          <div class="ex-title">Comparing Data</div>
+          <div class="ex-subtitle">Relational operators, logical operators, .ToUpper(), case-insensitive string comparison</div>
+        </div>
+      </div>
+      <div class="tab-row">
+        <div class="tab active" onclick="switchTab(this,'tut32-concepts')">Concepts</div>
+        <div class="tab" onclick="switchTab(this,'tut32-quiz')">Quiz</div>
+        <div class="tab" onclick="switchTab(this,'tut32-fill')">Fill-in</div>
+      </div>
+      <div class="tab-content active" id="tut32-concepts">
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>Relational Operators</h4>
+            <table style="margin-top:.5rem">
+              <tr><th>Op</th><th>Meaning</th></tr>
+              <tr><td>=</td><td>Equal to</td></tr>
+              <tr><td>&lt;&gt;</td><td>Not equal to</td></tr>
+              <tr><td>&gt;</td><td>Greater than</td></tr>
+              <tr><td>&lt;</td><td>Less than</td></tr>
+              <tr><td>&gt;=</td><td>Greater than or equal</td></tr>
+              <tr><td>&lt;=</td><td>Less than or equal</td></tr>
+            </table>
+          </div>
+          <div class="concept-card">
+            <h4>Logical Operators</h4>
+            <table style="margin-top:.5rem">
+              <tr><th>Op</th><th>Meaning</th></tr>
+              <tr><td>And</td><td>Both must be True</td></tr>
+              <tr><td>Or</td><td>At least one True</td></tr>
+              <tr><td>Not</td><td>Inverts Boolean</td></tr>
+              <tr><td>AndAlso</td><td>Short-circuit And</td></tr>
+              <tr><td>OrElse</td><td>Short-circuit Or</td></tr>
+            </table>
+          </div>
+          <div class="concept-card">
+            <h4>.ToUpper() for String Comparison</h4>
+            <p>Convert both strings to uppercase before comparing to make it case-insensitive.</p>
+            <div class="code-block"><span class="kw">If</span> string1.ToUpper() = string2.ToUpper() <span class="kw">Then</span>
+    compareResult = string1 &amp; vbNewLine _
+      &amp; <span class="str">"is equal to"</span> &amp; vbNewLine &amp; string2
+<span class="kw">Else</span>
+    compareResult = string1 &amp; vbNewLine _
+      &amp; <span class="str">"is not equal to"</span> &amp; vbNewLine &amp; string2
+<span class="kw">End If</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>Number Comparison Pattern</h4>
+            <div class="code-block"><span class="kw">If</span> num1 = num2 <span class="kw">Then</span>
+    result = <span class="str">"Both numbers are equal"</span>
+<span class="kw">ElseIf</span> num1 > num2 <span class="kw">Then</span>
+    result = num1.ToString(<span class="str">"N0"</span>) _
+      &amp; <span class="str">" is greater than "</span> _
+      &amp; num2.ToString(<span class="str">"N0"</span>)
+<span class="kw">Else</span>
+    result = num1.ToString(<span class="str">"N0"</span>) _
+      &amp; <span class="str">" is less than "</span> _
+      &amp; num2.ToString(<span class="str">"N0"</span>)
+<span class="kw">End If</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tut32-quiz">
+        <div class="quiz-section" id="quiz-tut32"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="checkQuiz('tut32')">Check Answers</button>
+          <button class="btn btn-ghost" onclick="resetQuiz('tut32')">Reset</button>
+        </div>
+        <div class="score-bar" id="score-tut32" style="display:none">
+          <div class="score-label">SCORE</div>
+          <div class="score-val" id="scoreval-tut32">0/0</div>
+          <div class="progress-dots" id="dots-tut32"></div>
+        </div>
+      </div>
+      <div class="tab-content" id="tut32-fill">
+        <div class="tip">Fill in the blanks to complete the string comparison code.</div>
+        <div class="fill-container" id="fill-tut32"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="checkFill('tut32')">Check</button>
+          <button class="btn btn-ghost" onclick="resetFill('tut32')">Reset</button>
+        </div>
+        <div id="fill-result-tut32" style="margin-top:.75rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;"></div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────── -->
+    <!-- TUT 4-1 -->
+    <!-- ─────────────────────────────── -->
+    <div class="page" id="page-tut41">
+      <div class="ex-header">
+        <div class="ex-label">TUT 4-1</div>
+        <div>
+          <div class="ex-title">Multiple Forms</div>
+          <div class="ex-subtitle">Global variables in a Module, ShowDialog(), Form_Activated event</div>
+        </div>
+      </div>
+      <div class="tab-row">
+        <div class="tab active" onclick="switchTab(this,'tut41-concepts')">Concepts</div>
+        <div class="tab" onclick="switchTab(this,'tut41-quiz')">Quiz</div>
+      </div>
+      <div class="tab-content active" id="tut41-concepts">
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>Module = Global Variables</h4>
+            <p>Variables in a Module are accessible from ALL forms in the project. Use Public to declare them.</p>
+            <div class="code-block"><span class="kw">Module</span> CodeModule
+    <span class="kw">Public</span> chargeAmt <span class="kw">As Double</span>
+<span class="kw">End Module</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>ShowDialog vs Show</h4>
+            <p>ShowDialog() opens the form modally — user cannot switch to the previous form until this one closes.</p>
+            <div class="code-block"><span class="cm">' Modal (can't switch back)</span>
+TotalChargeForm.ShowDialog()
+
+<span class="cm">' Non-modal (can switch)</span>
+TotalChargeForm.Show()</div>
+          </div>
+          <div class="concept-card">
+            <h4>Form_Activated Event</h4>
+            <p>Fires every time the form becomes active — safer than Form_Load (which only fires once) when you need to update values on return.</p>
+            <div class="code-block"><span class="kw">Private Sub</span> <span class="fn">TotalChargeForm_Activated</span>(...)
+    chargeLabel.Text = _
+      chargeAmt.ToString(<span class="str">"C2"</span>)
+<span class="kw">End Sub</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>Startup Form</h4>
+            <p>With multiple forms, tell VB which form to show first. Go to Project → Properties → Startup form.</p>
+            <div class="code-block"><span class="cm">' Project Properties → Application tab:</span>
+<span class="cm">' Startup form: TicketOrderForm</span>
+
+<span class="cm">' Close a form from a Return button:</span>
+<span class="kw">Me</span>.Close()</div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tut41-quiz">
+        <div class="quiz-section" id="quiz-tut41"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="checkQuiz('tut41')">Check Answers</button>
+          <button class="btn btn-ghost" onclick="resetQuiz('tut41')">Reset</button>
+        </div>
+        <div class="score-bar" id="score-tut41" style="display:none">
+          <div class="score-label">SCORE</div>
+          <div class="score-val" id="scoreval-tut41">0/0</div>
+          <div class="progress-dots" id="dots-tut41"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────── -->
+    <!-- TUT 4-2 -->
+    <!-- ─────────────────────────────── -->
+    <div class="page" id="page-tut42">
+      <div class="ex-header">
+        <div class="ex-label">TUT 4-2</div>
+        <div>
+          <div class="ex-title">Radio Buttons &amp; Checkboxes</div>
+          <div class="ex-subtitle">GroupBox, CheckChanged events, Enabled property, &amp;= string accumulation</div>
+        </div>
+      </div>
+      <div class="tab-row">
+        <div class="tab active" onclick="switchTab(this,'tut42-concepts')">Concepts</div>
+        <div class="tab" onclick="switchTab(this,'tut42-quiz')">Quiz</div>
+      </div>
+      <div class="tab-content active" id="tut42-concepts">
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h4>Radio Buttons</h4>
+            <p>Only ONE radio button in a GroupBox can be selected at a time. Check with .Checked property.</p>
+            <div class="code-block"><span class="kw">If</span> jarlRadioButton.Checked = <span class="kw">True</span> <span class="kw">Then</span>
+    seatPremiumLevel = <span class="num">5</span>
+    seatType = <span class="str">"Jarl"</span>
+<span class="kw">Else</span>
+    seatType = <span class="str">"Viking"</span>
+<span class="kw">End If</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>CheckChanged Event</h4>
+            <p>Fires when a checkbox is checked OR unchecked. Enable/disable corresponding textbox.</p>
+            <div class="code-block"><span class="kw">If</span> adultCheckBox.Checked = <span class="kw">True</span> <span class="kw">Then</span>
+    adultTextBox.Enabled = <span class="kw">True</span>
+<span class="kw">Else</span>
+    adultTextBox.Enabled = <span class="kw">False</span>
+    adultTextBox.Clear()
+<span class="kw">End If</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>&amp;= for String Accumulation</h4>
+            <p>Append to a string variable without re-typing the variable name.</p>
+            <div class="code-block"><span class="kw">If</span> adultQty &lt;&gt; <span class="num">0</span> <span class="kw">Then</span>
+    orderSummary = adultQty.ToString(<span class="str">"N0"</span>) _
+      &amp; <span class="str">" Adult "</span> &amp; seatType _
+      &amp; <span class="str">" Tickets "</span> &amp; adultCost.ToString(<span class="str">"C2"</span>) _
+      &amp; vbNewLine
+<span class="kw">End If</span>
+<span class="kw">If</span> childQty &lt;&gt; <span class="num">0</span> <span class="kw">Then</span>
+    orderSummary &amp;= childQty.ToString(<span class="str">"N0"</span>) _
+      &amp; <span class="str">" Child "</span> &amp; seatType &amp; <span class="str">" Tickets "</span> _
+      &amp; childCost.ToString(<span class="str">"C2"</span>) &amp; vbNewLine
+<span class="kw">End If</span></div>
+          </div>
+          <div class="concept-card">
+            <h4>Public Constants in Module</h4>
+            <div class="code-block"><span class="kw">Module</span> CodeModule
+    <span class="kw">Public</span> totalCost <span class="kw">As Double</span>
+    <span class="kw">Public</span> orderSummary <span class="kw">As String</span>
+    <span class="kw">Public Const</span> CHILD_PRICE <span class="kw">As Double</span> = <span class="num">4.95</span>
+    <span class="kw">Public Const</span> ADULT_PRICE <span class="kw">As Double</span> = <span class="num">8.95</span>
+    <span class="kw">Public Const</span> SENIOR_PRICE <span class="kw">As Double</span> = <span class="num">6.95</span>
+<span class="kw">End Module</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tut42-quiz">
+        <div class="quiz-section" id="quiz-tut42"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="checkQuiz('tut42')">Check Answers</button>
+          <button class="btn btn-ghost" onclick="resetQuiz('tut42')">Reset</button>
+        </div>
+        <div class="score-bar" id="score-tut42" style="display:none">
+          <div class="score-label">SCORE</div>
+          <div class="score-val" id="scoreval-tut42">0/0</div>
+          <div class="progress-dots" id="dots-tut42"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────── -->
+    <!-- CHEAT SHEET -->
+    <!-- ─────────────────────────────── -->
+    <div class="page" id="page-cheatsheet">
+      <div class="ex-header">
+        <div class="ex-label">REF</div>
+        <div>
+          <div class="ex-title">VB.NET Cheat Sheet</div>
+          <div class="ex-subtitle">All key syntax for MIS 322 in one place</div>
+        </div>
+      </div>
+      <div class="concept-section"><h2>Data Types</h2></div>
+      <table style="margin-bottom:2rem">
+        <tr><th>Type</th><th>Use For</th><th>Example</th></tr>
+        <tr><td>Integer</td><td>Whole numbers</td><td>Dim qty As Integer</td></tr>
+        <tr><td>Double</td><td>Decimal numbers</td><td>Dim price As Double</td></tr>
+        <tr><td>String</td><td>Text</td><td>Dim name As String</td></tr>
+        <tr><td>Boolean</td><td>True / False</td><td>Dim isValid As Boolean</td></tr>
+        <tr><td>Const</td><td>Unchanging value</td><td>Const TAX As Double = 0.1</td></tr>
+      </table>
+      <div class="concept-section"><h2>Declarations</h2></div>
+      <table style="margin-bottom:2rem">
+        <tr><th>Keyword</th><th>Scope</th><th>Where</th></tr>
+        <tr><td>Dim</td><td>Procedure-level</td><td>Inside a Sub</td></tr>
+        <tr><td>Private</td><td>Class-level</td><td>Inside Class, above all Subs</td></tr>
+        <tr><td>Public</td><td>Global</td><td>Inside a Module</td></tr>
+        <tr><td>Const</td><td>Same as Private/Public</td><td>Anywhere declarations go</td></tr>
+      </table>
+      <div class="concept-section"><h2>Conversions</h2></div>
+      <table style="margin-bottom:2rem">
+        <tr><th>Function</th><th>Converts To</th><th>Notes</th></tr>
+        <tr><td>Convert.ToDouble(x)</td><td>Double</td><td>Throws FormatException if not a number</td></tr>
+        <tr><td>Convert.ToInt32(x)</td><td>Integer</td><td>Throws FormatException for decimals/letters</td></tr>
+        <tr><td>x.ToString("C2")</td><td>String $</td><td>Currency, 2 decimal places</td></tr>
+        <tr><td>x.ToString("N0")</td><td>String</td><td>Number, no decimals</td></tr>
+        <tr><td>x.ToString("N2")</td><td>String</td><td>Number, 2 decimal places</td></tr>
+        <tr><td>x.ToString("P1")</td><td>String %</td><td>Percent, 1 decimal</td></tr>
+      </table>
+      <div class="concept-section"><h2>String Operations</h2></div>
+      <table style="margin-bottom:2rem">
+        <tr><th>Operation</th><th>Code</th></tr>
+        <tr><td>Concatenate</td><td>str1 & str2</td></tr>
+        <tr><td>Append to self</td><td>str &= " more text"</td></tr>
+        <tr><td>New line</td><td>vbNewLine</td></tr>
+        <tr><td>Uppercase</td><td>str.ToUpper()</td></tr>
+        <tr><td>Lowercase</td><td>str.ToLower()</td></tr>
+        <tr><td>StrConv upper</td><td>StrConv(str, VbStrConv.UpperCase)</td></tr>
+        <tr><td>Check empty</td><td>str = "" or str.Length = 0</td></tr>
+      </table>
+      <div class="concept-section"><h2>Error Trapping</h2></div>
+      <table style="margin-bottom:2rem">
+        <tr><th>Exception</th><th>Triggered By</th></tr>
+        <tr><td>FormatException</td><td>Letters/symbols where a number is expected</td></tr>
+        <tr><td>OverflowException</td><td>Number too large for the data type</td></tr>
+        <tr><td>Exception</td><td>Catch-all — use last</td></tr>
+      </table>
+      <div class="concept-section"><h2>Common Methods</h2></div>
+      <table>
+        <tr><th>Method</th><th>Effect</th></tr>
+        <tr><td>textBox.Clear()</td><td>Empties a textbox</td></tr>
+        <tr><td>textBox.Focus()</td><td>Puts cursor in textbox</td></tr>
+        <tr><td>Me.Close()</td><td>Closes the current form</td></tr>
+        <tr><td>MessageBox.Show("msg")</td><td>Shows a popup message</td></tr>
+        <tr><td>Exit Sub</td><td>Stops the current procedure immediately</td></tr>
+        <tr><td>rnd.Next(1, 5)</td><td>Random int: 1, 2, 3, or 4</td></tr>
+        <tr><td>Form2.ShowDialog()</td><td>Show form modally</td></tr>
+        <tr><td>Form2.Show()</td><td>Show form non-modally</td></tr>
+      </table>
+    </div>
+
+    <!-- ─────────────────────────────── -->
+    <!-- SANDBOX -->
+    <!-- ─────────────────────────────── -->
+    <div class="page" id="page-sandbox">
+      <div class="ex-header">
+        <div class="ex-label">TOOL</div>
+        <div>
+          <div class="ex-title">Code Sandbox</div>
+          <div class="ex-subtitle">Practice writing VB.NET — click a template to load it, or type your own</div>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-bottom:1rem;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="loadTemplate('loop')">Loop Template</button>
+        <button class="btn btn-ghost" onclick="loadTemplate('trycatch')">Try/Catch Template</button>
+        <button class="btn btn-ghost" onclick="loadTemplate('selectcase')">Select Case Template</button>
+        <button class="btn btn-ghost" onclick="loadTemplate('scope')">Scope Template</button>
+      </div>
+      <textarea class="sandbox" id="sandbox-code" spellcheck="false" placeholder="Type or paste VB.NET code here for reference..."></textarea>
+      <div style="margin-top:.5rem;font-size:.75rem;color:var(--muted);font-family:'JetBrains Mono',monospace">
+        ⚠ This is a text editor only — it doesn't run VB.NET. Use it to draft and compare code.
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ─────────── Navigation ───────────
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// ─────────── Tabs ───────────
+function switchTab(tabEl, contentId) {
+  const parent = tabEl.closest('.page') || tabEl.parentElement.parentElement;
+  parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  tabEl.classList.add('active');
+  document.getElementById(contentId).classList.add('active');
+}
+
+// ─────────── Quiz Data ───────────
+const quizData = {
+  ce12: [
+    { q: "Which operator returns the remainder of integer division?", opts: ["Div", "Mod", "Rem", "\\\\"], ans: 1,
+      explain: "The Mod operator returns the remainder. For example, 4 Mod 2 = 0 (even), 3 Mod 2 = 1 (odd)." },
+    { q: "If x Mod 2 = 0, what can you conclude?", opts: ["x is odd", "x is divisible by 3", "x is even", "x is negative"], ans: 2,
+      explain: "If the remainder when dividing by 2 is 0, the number divides evenly — it's even." },
+    { q: "Which type of loop is most appropriate when you know the start and end numbers?", opts: ["Do While", "Do Until", "For...Next", "While...End While"], ans: 2,
+      explain: "A For...Next loop is ideal when you know the exact range to iterate through." },
+    { q: "Which StyleSheet requirement applies to control names and variables?", opts: ["PascalCase", "camelCase", "ALL_CAPS", "snake_case"], ans: 1,
+      explain: "MIS 322 StyleSheet requires camelCase for controls and variables (e.g., startTextBox, evenCount)." },
+    { q: "To append a number and a space to a label inside a loop, you would write:", opts:["label.Text = x", "label.Text &= x & \" \"", "label.Text += x", "label.Append(x)"], ans: 1,
+      explain: "Use &= to append to the existing text, and & \" \" to add a separating space." },
+  ],
+  lap1: [
+    { q: "What property do you set to True to prevent users from typing in a textbox?", opts: ["Enabled = False", "ReadOnly = True", "Visible = False", "TabStop = False"], ans: 1,
+      explain: "ReadOnly = True lets the control still display values but prevents user input." },
+    { q: "Which declaration scope should totalCost use in the Calculate Cost button event?", opts: ["Public (module-level)", "Private (class-level)", "Dim (procedure-level)", "Const"], ans: 2,
+      explain: "totalCost is only needed inside the one click event, so Dim (procedure-level) is correct." },
+    { q: "To hide the Total Cost label and textbox, you set which property to False?", opts: ["Enabled", "ReadOnly", "Visible", "TabStop"], ans: 2,
+      explain: "Setting .Visible = False hides the control completely from the user." },
+    { q: "Which code correctly clears a textbox?", opts: ["textBox.Delete()", "textBox.Empty()", "textBox.Clear()", "textBox.Reset()"], ans: 2,
+      explain: ".Clear() empties the Text property of a textbox. You can also use textBox.Text = \"\"." },
+  ],
+  tut21: [
+    { q: "The quantity variable is used in the +1 button, -1 button, AND invoice button. What scope should it be?", opts: ["Dim (procedure-level)", "Private (class-level)", "Public (module)", "Const"], ans: 1,
+      explain: "Because quantity is needed across multiple procedures, it must be declared as Private at the class level." },
+    { q: "Which keyword declares a class-level variable?", opts: ["Dim", "Var", "Private", "Local"], ans: 2,
+      explain: "Private declares a variable at the class level, accessible from any Sub inside that form's class." },
+    { q: "What does quantity += 1 do?", opts: ["Declares quantity as 1", "Sets quantity to 1", "Adds 1 to the existing value of quantity", "Multiplies quantity by 1"], ans: 2,
+      explain: "quantity += 1 is shorthand for quantity = quantity + 1. It increments the variable." },
+    { q: "Where do you declare class-level variables in the code?", opts: ["Inside a Sub procedure", "Inside a Function", "Between Public Class Form1 and the first Sub", "At the very bottom of the file"], ans: 2,
+      explain: "Class-level variables go between the Public Class Form1 header and the first Sub procedure." },
+    { q: "The MyBase.Load event is the right place to:", opts: ["Calculate totals", "Initialize labels like tax rate", "Clear textboxes", "Show a second form"], ans: 1,
+      explain: "Form_Load fires once when the form opens — ideal for setting initial values like taxLabel.Text = \"0.10\"." },
+  ],
+  tut22: [
+    { q: "InputBox() always returns what data type?", opts: ["Integer", "Double", "String", "Boolean"], ans: 2,
+      explain: "InputBox() always returns a String, even if the user types a number. You must convert it explicitly." },
+    { q: "With Option Strict On, how do you convert a String to a Double?", opts: ["price = priceText", "price = CDbl(priceText)", "price = Convert.ToDouble(priceText)", "Both B and C"], ans: 3,
+      explain: "Both CDbl() and Convert.ToDouble() work. With Option Strict On, implicit conversion is not allowed." },
+    { q: "Which format string shows currency with 2 decimal places?", opts: ["\"N2\"", "\"C2\"", "\"P2\"", "\"D2\""], ans: 1,
+      explain: "\"C2\" formats as currency (e.g., $27.50). \"N2\" gives a plain number with 2 decimals." },
+    { q: "A constant is best used for:", opts: ["Values that change per user input", "Values that never change (like tax rate)", "Loop counters", "Output labels"], ans: 1,
+      explain: "Constants (Const) store values that should never change during the program — like TAXRATE = 0.10." },
+    { q: "What does Option Strict On enforce?", opts: ["All variables must be lowercase", "All variables must be declared before use", "Explicit type conversions — no implicit coercion", "Constants must be in all caps"], ans: 2,
+      explain: "Option Strict On requires explicit type conversions, catching type mismatches at compile time." },
+  ],
+  tut23: [
+    { q: "Which exception is thrown when you try to convert \"hello\" to a number?", opts: ["OverflowException", "ArgumentException", "FormatException", "InvalidCastException"], ans: 2,
+      explain: "FormatException is thrown when the string format doesn't match the expected numeric format." },
+    { q: "Which exception is thrown when a number is too large for the data type?", opts: ["FormatException", "OverflowException", "OutOfRangeException", "MemoryException"], ans: 1,
+      explain: "OverflowException occurs when a value is outside the valid range for its data type." },
+    { q: "In a Try/Catch block, the general 'Exception' catch must come:", opts: ["First", "Second", "Last", "Order doesn't matter"], ans: 2,
+      explain: "The general Exception catch must come LAST. VB processes catches in order; specific ones must precede general ones." },
+    { q: "What does 'Exit Sub' do inside a Catch block?", opts: ["Closes the form", "Skips to End Try only", "Immediately stops the Sub procedure", "Re-runs the Try block"], ans: 2,
+      explain: "Exit Sub immediately exits the entire Sub procedure — important so nothing else in the Sub runs after an error." },
+    { q: "For blank field checking, which structure is used (NOT Try/Catch)?", opts: ["Try/Catch", "For Loop", "If...Then...End If", "Select Case"], ans: 2,
+      explain: "Blank field checks are logic errors (not conversion errors), so use If...Then. e.g., If textBox.Text = \"\" Then..." },
+    { q: "Checking quantity BEFORE updating prevents:", opts: ["Compilation errors", "The variable going out of range", "The form from closing", "Convert.ToInt32 from running"], ans: 1,
+      explain: "You check if quantity + 1 >= limit BEFORE actually incrementing, so if the limit is hit you Exit Sub without changing anything." },
+  ],
+  lap2: [
+    { q: "In LAP 2, what is the correct Tax Amount formula?", opts: [
+      "Tax = GoodsPrice × TaxRate",
+      "Tax = (GoodsPrice × Qty + Shipping) × TaxRate",
+      "Tax = (GoodsPrice + Shipping) × TaxRate",
+      "Tax = GoodsPrice × Qty × TaxRate"
+    ], ans: 1, explain: "Tax = (GoodsPrice × Quantity + ShippingCost) × TaxRate — tax applies to the full subtotal including shipping." },
+    { q: "Given Goods=5, Shipping=2, Qty=4, TaxRate=0.10, what is the Tax Amount?", opts: ["$2.00", "$2.20", "$2.40", "$0.70"], ans: 1,
+      explain: "(5 × 4 + 2) × 0.10 = 22 × 0.10 = $2.20" },
+    { q: "What is the Total Cost for the same values above?", opts: ["$22.00", "$24.00", "$24.20", "$26.20"], ans: 2,
+      explain: "Total = 5 × 4 + 2 + 2.20 = 20 + 2 + 2.20 = $24.20" },
+    { q: "The quantity starts at 1 and has a max of:", opts: ["10", "5", "4", "100"], ans: 2,
+      explain: "LAP 2 specifies an upper limit of 4 items and a lower limit of 1." },
+    { q: "The tax rate is declared as a constant double equal to:", opts: ["0.05", "0.10", "0.15", "0.12"], ans: 1,
+      explain: "The instructions specify Const TAXRATE As Double = 0.1 (10%)." },
+  ],
+  tut31: [
+    { q: "What is the output of rnd.Next(1, 5)?", opts: ["1 through 5", "1 through 4", "0 through 4", "0 through 5"], ans: 1,
+      explain: "Next(min, max) is inclusive of min and EXCLUSIVE of max. So Next(1, 5) returns 1, 2, 3, or 4." },
+    { q: "Which structure is cleanest for assigning price based on shirt color?", opts: ["If Then only", "For Loop", "Select Case", "Try/Catch"], ans: 2,
+      explain: "Select Case is ideal when testing one variable (shirtColor) against multiple possible string values." },
+    { q: "To show two lines in one label, what do you use?", opts: ["newline", "vbCrLf only", "vbNewLine", "Environment.NewLine only"], ans: 2,
+      explain: "vbNewLine is the standard VB.NET constant for inserting a line break in a string." },
+    { q: "If shirtPrice = 10 and shirtQty = 31 and TAXRATE = 0.125, what is orderTotal?", opts: ["$310.00", "$347.50", "$348.75", "$341.25"], ans: 1,
+      explain: "SubTotal = 10 × 31 = 310. Total = 310 × (1 + 0.125) = 310 × 1.125 = $348.75. (The screenshot shows $418.50 for a different price.)" },
+    { q: "The Clear button should NOT clear:", opts: ["customerTextBox", "shirtQtyTextBox", "taxLabel", "colorChoiceLabel"], ans: 2,
+      explain: "The tax rate label is set in Form_Load and should remain visible. Only input fields and output labels get cleared." },
+  ],
+  tut32: [
+    { q: "To compare two strings case-insensitively, you should:", opts: [
+      "Use = directly on the raw strings",
+      "Compare string1.ToUpper() to string2.ToUpper()",
+      "Use the CaseSensitive property",
+      "Convert both to integers first"
+    ], ans: 1, explain: "Call .ToUpper() on both strings before comparing with = to ignore case." },
+    { q: "What does the <> operator mean in VB.NET?", opts: ["Less than or equal", "Greater than or equal", "Not equal to", "Approximately equal"], ans: 2,
+      explain: "<> is VB.NET's 'not equal to' operator, equivalent to != in other languages." },
+    { q: "Which operator requires BOTH conditions to be True?", opts: ["Or", "Not", "And", "Xor"], ans: 2,
+      explain: "And requires both conditions to be True. Or requires at least one to be True." },
+    { q: "num1 = 15, num2 = 15. What does the number compare output?", opts: ["15 is greater than 15", "15 is less than 15", "Both numbers are equal", "Numbers are invalid"], ans: 2,
+      explain: "When num1 = num2, the first If branch triggers: 'Both numbers are equal'." },
+    { q: "The number comparison uses Convert.ToInt32. What does this mean for decimal input?", opts: [
+      "Decimals are rounded automatically",
+      "Decimals cause a FormatException",
+      "Decimals are truncated silently",
+      "Decimals work fine"
+    ], ans: 1, explain: "Convert.ToInt32('3.5') throws a FormatException — only whole numbers are accepted." },
+  ],
+  tut41: [
+    { q: "Where must global variables be declared to be accessible from multiple forms?", opts: ["Inside Form1 as Public", "Inside Form1 as Private", "Inside a Module as Public", "Inside Sub Main"], ans: 2,
+      explain: "Variables in a Module declared as Public are accessible from all forms in the project." },
+    { q: "ShowDialog() vs Show() — what's the key difference?", opts: [
+      "ShowDialog is faster",
+      "Show() is modal (blocks previous form); ShowDialog() is not",
+      "ShowDialog() is modal (blocks previous form); Show() is not",
+      "There is no difference"
+    ], ans: 2, explain: "ShowDialog() is modal — the user cannot interact with the previous form until this one closes." },
+    { q: "Why use Form_Activated instead of Form_Load for updating a label?", opts: [
+      "Form_Load is deprecated",
+      "Form_Activated fires every time the form is shown/returned to; Form_Load only fires once",
+      "Form_Activated is faster",
+      "Form_Load doesn't work with labels"
+    ], ans: 1, explain: "Form_Load only runs once (on first show). Form_Activated runs every time the form becomes active — important for multi-trip forms." },
+    { q: "To close the current form from a Return button:", opts: ["Application.Exit()", "Form1.Hide()", "Me.Close()", "End"], ans: 2,
+      explain: "Me.Close() closes the current form instance. This is the proper way to close a modal dialog." },
+  ],
+  tut42: [
+    { q: "Radio buttons inside the same GroupBox automatically:", opts: [
+      "Allow multiple selections",
+      "Only allow one selection at a time",
+      "Require manual deselection",
+      "Fire the Click event twice"
+    ], ans: 1, explain: "Radio buttons in the same GroupBox are mutually exclusive — selecting one deselects the others automatically." },
+    { q: "Which event should you use to enable/disable a textbox when a checkbox changes?", opts: ["Click", "MouseEnter", "CheckedChanged", "TextChanged"], ans: 2,
+      explain: "CheckedChanged fires when the Checked state changes — either checked OR unchecked." },
+    { q: "If Jarl seating adds $5 per ticket and adult base price = $8.95, what's the adult Jarl ticket price?", opts: ["$8.95", "$13.95", "$5.00", "$9.95"], ans: 1,
+      explain: "Adult cost = (ADULT_PRICE + seatPremiumLevel) × adultQty = (8.95 + 5) = $13.95 per ticket." },
+    { q: "To append to orderSummary without clearing it, you use:", opts: ["orderSummary = orderSummary + line", "orderSummary &= line", "orderSummary.Append(line)", "Both A and B"], ans: 3,
+      explain: "&= is the VB.NET string append shorthand. It appends without erasing existing content." },
+    { q: "The &= operator on a String is equivalent to:", opts: [
+      "str = str - line",
+      "str = str & line",
+      "str = line & str",
+      "str.Insert(line)"
+    ], ans: 1, explain: "str &= x is exactly the same as str = str & x. It appends x to the end of str." },
+  ],
+};
+
+// ─────────── Fill-in Data ───────────
+const fillData = {
+  ce12: {
+    template: `For [BLANK1] As Integer = startNum To endNum
+    If x [BLANK2] 2 = 0 Then
+        evenNumbersLabel.Text [BLANK3]= x & " "
+    End If
+Next x`,
+    blanks: ['x', 'Mod', '&'],
+    labels: ['BLANK1', 'BLANK2', 'BLANK3'],
+    hints: ['loop variable name', 'remainder operator', 'append operator']
+  },
+  tut23: {
+    template: `[BLANK1]
+    price = Convert.ToDouble(priceText)
+Catch fe As [BLANK2]
+    MessageBox.Show("Price is not a number")
+    [BLANK3]
+Catch oe As OverflowException
+    MessageBox.Show("Price is too large")
+    Exit Sub
+Catch ex As Exception
+    MessageBox.Show(ex.Message)
+    Exit Sub
+End Try`,
+    blanks: ['Try', 'FormatException', 'Exit Sub'],
+    labels: ['BLANK1', 'BLANK2', 'BLANK3'],
+    hints: ['start the error-handling block', 'exception for non-numeric input', 'stop the procedure']
+  },
+  tut32: {
+    template: `Dim string1, string2 As [BLANK1]
+string1 = string1TextBox.Text
+string2 = string2TextBox.Text
+
+If string1.[BLANK2]() = string2.[BLANK2]() Then
+    compareResult = string1 & vbNewLine _
+      & "is equal to" & vbNewLine & string2
+[BLANK3]
+    compareResult = string1 & vbNewLine _
+      & "is not equal to" & vbNewLine & string2
+End If`,
+    blanks: ['String', 'ToUpper', 'Else'],
+    labels: ['BLANK1', 'BLANK2', 'BLANK3'],
+    hints: ['data type for text', 'method for case-insensitive compare', 'alternative branch keyword']
+  }
+};
+
+// ─────────── Render Quizzes ───────────
+function renderQuiz(id) {
+  const container = document.getElementById('quiz-' + id);
+  if (!container || container.dataset.rendered) return;
+  container.dataset.rendered = '1';
+  const qs = quizData[id];
+  container.innerHTML = qs.map((q, i) => `
+    <div class="quiz-card" id="qcard-${id}-${i}">
+      <div class="quiz-q"><span class="q-num">Q${i+1} of ${qs.length}</span>${q.q}</div>
+      <div class="quiz-options">
+        ${q.opts.map((o, j) => `<button class="quiz-opt" onclick="selectOpt('${id}',${i},${j},this)">${o}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="qfb-${id}-${i}"></div>
+    </div>
+  `).join('');
+}
+
+function selectOpt(id, qi, oi, el) {
+  const card = document.getElementById(`qcard-${id}-${qi}`);
+  const opts = card.querySelectorAll('.quiz-opt');
+  opts.forEach(o => { o.classList.remove('correct','wrong'); });
+  el.classList.add('selected-temp');
+  el.dataset.chosen = oi;
+}
+
+function checkQuiz(id) {
+  const qs = quizData[id];
+  let correct = 0;
+  const results = [];
+  qs.forEach((q, i) => {
+    const card = document.getElementById(`qcard-${id}-${i}`);
+    const opts = card.querySelectorAll('.quiz-opt');
+    let chosen = -1;
+    opts.forEach((o, j) => { if (o.dataset.chosen !== undefined) chosen = parseInt(o.dataset.chosen); });
+    // find actually selected
+    opts.forEach((o, j) => {
+      if (o.classList.contains('selected-temp')) chosen = j;
+    });
+    const fb = document.getElementById(`qfb-${id}-${i}`);
+    opts.forEach((o, j) => {
+      o.classList.remove('selected-temp');
+      o.disabled = true;
+      if (j === q.ans) o.classList.add('correct');
+      else if (j === chosen && chosen !== q.ans) o.classList.add('wrong');
+    });
+    const isRight = chosen === q.ans;
+    if (isRight) correct++;
+    results.push(isRight);
+    fb.textContent = (isRight ? '✓ ' : '✗ ') + q.explain;
+    fb.className = 'quiz-feedback show ' + (isRight ? 'correct' : 'wrong');
+  });
+  const scoreBar = document.getElementById(`score-${id}`);
+  scoreBar.style.display = 'flex';
+  document.getElementById(`scoreval-${id}`).textContent = `${correct}/${qs.length}`;
+  const dots = document.getElementById(`dots-${id}`);
+  dots.innerHTML = results.map(r => `<div class="p-dot ${r ? 'done' : 'wrong'}"></div>`).join('');
+}
+
+function resetQuiz(id) {
+  const container = document.getElementById('quiz-' + id);
+  container.dataset.rendered = '';
+  document.getElementById(`score-${id}`).style.display = 'none';
+  renderQuiz(id);
+}
+
+// ─────────── Render Fill-in ───────────
+function renderFill(id) {
+  const container = document.getElementById('fill-' + id);
+  if (!container || container.dataset.rendered) return;
+  container.dataset.rendered = '1';
+  const d = fillData[id];
+  let html = d.template;
+  d.labels.forEach((label, i) => {
+    html = html.replace(`[${label}]`,
+      `<input class="fill-blank" id="fb-${id}-${i}" placeholder="${d.hints[i]}" autocomplete="off" spellcheck="false">`
+    );
+  });
+  container.innerHTML = html;
+}
+
+function checkFill(id) {
+  const d = fillData[id];
+  let correct = 0;
+  d.blanks.forEach((ans, i) => {
+    const inp = document.getElementById(`fb-${id}-${i}`);
+    if (!inp) return;
+    const val = inp.value.trim();
+    if (val.toLowerCase() === ans.toLowerCase()) {
+      inp.classList.add('correct'); inp.classList.remove('wrong'); correct++;
+    } else {
+      inp.classList.add('wrong'); inp.classList.remove('correct');
+    }
+  });
+  const res = document.getElementById(`fill-result-${id}`);
+  const pct = Math.round(correct/d.blanks.length*100);
+  res.style.color = correct === d.blanks.length ? 'var(--pass)' : 'var(--warn)';
+  res.textContent = `${correct}/${d.blanks.length} correct (${pct}%)` + (correct < d.blanks.length ? ' — check red fields' : ' — perfect!');
+}
+
+function resetFill(id) {
+  const d = fillData[id];
+  d.blanks.forEach((_, i) => {
+    const inp = document.getElementById(`fb-${id}-${i}`);
+    if (inp) { inp.value = ''; inp.classList.remove('correct','wrong'); }
+  });
+  const res = document.getElementById(`fill-result-${id}`);
+  if (res) res.textContent = '';
+}
+
+// ─────────── Sandbox Templates ───────────
+const templates = {
+  loop: `' ================================
+' CE 1-2  Your Name  MIS 322
+' Even Number Counter
+' ================================
+
+Private Sub countEvenNumbersButton_Click(...) Handles ...
+    ' Count even numbers between start and end
+    Dim startNum As Integer
+    Dim endNum As Integer
+    startNum = Convert.ToInt32(startTextBox.Text)
+    endNum = Convert.ToInt32(endTextBox.Text)
+    
+    evenNumbersLabel.Text = ""
+    
+    For x As Integer = startNum To endNum
+        If x Mod 2 = 0 Then
+            evenNumbersLabel.Text &= x & " "
+        End If
+    Next x
+End Sub`,
+  trycatch: `' Try/Catch template — Tut 2-3
+Try
+    price = Convert.ToDouble(priceText)
+Catch fe As FormatException
+    MessageBox.Show("Price is not a number")
+    Exit Sub
+Catch oe As OverflowException
+    MessageBox.Show("Price is too large")
+    Exit Sub
+Catch ex As Exception
+    MessageBox.Show(ex.Message)
+    Exit Sub
+End Try`,
+  selectcase: `' Select Case template — Tut 3-1
+Select Case shirtColor
+    Case "Red"
+        shirtPrice = 10
+    Case "Green"
+        shirtPrice = 12
+    Case "Blue"
+        shirtPrice = 14
+    Case "Pink"
+        shirtPrice = 16
+End Select`,
+  scope: `' ================================
+' Scope demonstration
+' ================================
+Public Class Form1
+    ' CLASS-LEVEL: needed in multiple Subs
+    Private quantity As Integer
+    Private Const TAXRATE As Double = 0.10
+
+    Private Sub invoiceButton_Click(...) Handles ...
+        ' PROCEDURE-LEVEL: only needed here
+        Dim subtotal As Double
+        Dim taxAmount As Double
+        Dim amountDue As Double
+        
+        subtotal = price * quantity
+        taxAmount = subtotal * TAXRATE
+        amountDue = subtotal + taxAmount
+    End Sub
+End Class`
+};
+
+function loadTemplate(key) {
+  document.getElementById('sandbox-code').value = templates[key];
+}
+
+// ─────────── Init ───────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Pre-render all quizzes and fill-ins
+  Object.keys(quizData).forEach(renderQuiz);
+  Object.keys(fillData).forEach(renderFill);
+
+  // Re-render when tabs are clicked
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab._origOnclick = tab.getAttribute('onclick');
+  });
+});
+
+// Also render when a quiz tab is clicked
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    setTimeout(() => {
+      Object.keys(quizData).forEach(renderQuiz);
+      Object.keys(fillData).forEach(renderFill);
+    }, 50);
+  });
+});
+</script>
+</body>
+</html>
